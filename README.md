@@ -66,3 +66,10 @@ V1.8: Enlarged and tilted hero fish (head upper-left, tail lower-right), adjuste
 
 ### V1.9.3 — SAVE MY STYLE 離線匯出修正
 穿搭實驗室新增 `shoe-export-assets.js`，將七款鞋圖以內嵌資料形式提供給 Canvas 匯出，避免直接以 `file://` 開啟網頁時，瀏覽器將本機圖片視為不安全來源，導致 `Tainted canvases may not be exported`。請保留此檔案與網站其他檔案在同一資料夾。
+
+
+## V1.9.4 新增
+- `brand-extras.html`：BRAND EXTRAS 獨立展示頁，四類周邊與可左右切換的作品介紹彈窗。現階段使用示意排版，未假冒正式作品圖。
+- 首頁與周邊頁的頂部導覽列新增 BRAND EXTRAS；手機版同樣可用。
+- 商品介紹彈窗新增 TRY IT ON，將對應系列的示意鞋扣帶入穿搭實驗室並預先選取；無對應鞋扣的配件系列則顯示 EXPLORE STYLE LAB。
+- 使用 `style-lab.html?charm=p1` 等網址傳遞鞋扣選擇。鞋扣仍為原網站的示意符號，待正式圖片替換。
