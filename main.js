@@ -118,16 +118,19 @@ function initFish(){
 function initExtras(){
  const grid=$('#extras-grid'),modal=$('#extras-modal');if(!grid||!modal)return;
  const works=[
- {en:'BUSINESS CARD',zh:'名片',type:'BRAND IDENTITY',detail:'品牌名片正反面與視覺識別延伸。',spec:'正反面設計／尺寸與材質待補',mark:'PIKO',layout:'card'},
- {en:'POSTCARDS',zh:'明信片',type:'PRINT COLLECTION',detail:'延續海洋主題與實驗性拼貼語言的明信片系列。',spec:'系列款式／印刷規格待補',mark:'FROM WASTE\nTO WEAR',layout:'postcard'},
- {en:'INSTRUCTION GUIDE',zh:'說明書',type:'USER GUIDE',detail:'鞋扣及鈕扣配件的使用方式、注意事項與品牌資訊。',spec:'摺頁形式／頁數與紙材待補',mark:'HOW TO\nPIKO?',layout:'guide'},
- {en:'STICKERS',zh:'貼紙',type:'GRAPHIC EXTRAS',detail:'品牌標誌、海洋意象與文字元素的延伸貼紙設計。',spec:'刀模造型／尺寸與材質待補',mark:'PIKO!',layout:'sticker'}
+ {en:'SEAFOOD SPECIAL',zh:'橘色明信片',type:'POSTCARDS / 01',image:'assets/postcard-orange.png',detail:'以海鮮料理與塑膠廢棄物的拼貼，借用菜單語言反諷海洋污染。',spec:'直式明信片／尺寸與紙材待補'},
+ {en:'FRESHLY CAUGHT',zh:'藍色明信片',type:'POSTCARDS / 02',image:'assets/postcard-blue.png',detail:'以魚鉤、魚與裝滿廢棄物的塑膠袋呈現海洋生物面臨的污染威脅。',spec:'直式明信片／尺寸與紙材待補'},
+ {en:'BUSINESS CARD',zh:'名片',type:'BRAND IDENTITY',detail:'品牌名片正反面與視覺識別延伸。',spec:'正式作品與規格待補'},
+ {en:'INSTRUCTION GUIDE',zh:'說明書',type:'USER GUIDE',detail:'鞋扣及鈕扣配件的使用方式與品牌資訊。',spec:'正式作品與規格待補'},
+ {en:'STICKERS',zh:'貼紙',type:'GRAPHIC EXTRAS',detail:'品牌視覺延伸貼紙。',spec:'正式作品與規格待補'}
  ];
- const visual=w=>`<div class="extras-art extras-art--${w.layout}"><div class="extras-art-piece"><span class="extras-art-mini">PIKO / ${w.type}</span><strong>${w.mark.replace(/\n/g,'<br>')}</strong><span class="extras-art-foot">OCEAN WASTE, REIMAGINED</span></div></div>`;
- grid.innerHTML=works.map((w,i)=>`<button class="extras-card" type="button" data-extra="${i}" aria-label="查看${w.zh}介紹">${visual(w)}<span class="extras-card-meta"><span>0${i+1} / ${w.en}</span><strong>${w.zh} ↗</strong></span></button>`).join('');
- let current=0;const render=()=>{const w=works[current];$('#extras-modal-art').innerHTML=visual(w);$('#extras-modal-count').textContent=`0${current+1} / 04`;$('#extras-modal-title').textContent=w.en;$('#extras-modal-zh').textContent=w.zh;$('#extras-modal-desc').textContent=w.detail;$('#extras-modal-spec').textContent=w.spec;};
+ const visual=w=>w.image?`<img class="extra-print" src="${w.image}" alt="${w.zh} — ${w.en}">`:`<div class="extra-pending"><span>${w.type}</span><strong>${w.en}</strong><small>作品待補 / COMING SOON</small></div>`;
+ grid.classList.add('extras-editorial');
+ grid.innerHTML=works.map((w,i)=>`<button class="extra-object extra-object--${i}" type="button" data-extra="${i}" aria-label="查看${w.zh}介紹">${visual(w)}<span class="extra-label">0${i+1} / ${w.zh} <span>↗</span></span></button>`).join('');
+ let current=0;const render=()=>{const w=works[current];$('#extras-modal-art').innerHTML=visual(w);$('#extras-modal-count').textContent=`0${current+1} / 0${works.length}`;$('#extras-modal-title').textContent=w.en;$('#extras-modal-zh').textContent=w.zh;$('#extras-modal-desc').textContent=w.detail;$('#extras-modal-spec').textContent=w.spec;};
+ const step=d=>{current=(current+d+works.length)%works.length;render()};
  const open=i=>{current=i;render();modal.showModal()};$$('[data-extra]',grid).forEach(b=>b.addEventListener('click',()=>open(Number(b.dataset.extra))));
- $('#extras-close').addEventListener('click',()=>modal.close());$('#extras-prev').addEventListener('click',()=>{current=(current+3)%4;render()});$('#extras-next').addEventListener('click',()=>{current=(current+1)%4;render()});modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});modal.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){current=(current+1)%4;render()}if(e.key==='ArrowLeft'){current=(current+3)%4;render()}});
- let touchX=null;modal.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX},{passive:true});modal.addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>65){current=(current+(dx<0?1:3))%4;render()}touchX=null},{passive:true});
+ $('#extras-close').addEventListener('click',()=>modal.close());$('#extras-prev').addEventListener('click',()=>step(-1));$('#extras-next').addEventListener('click',()=>step(1));modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});modal.addEventListener('keydown',e=>{if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+ let touchX=null;modal.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX},{passive:true});modal.addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>65)step(dx<0?1:-1);touchX=null},{passive:true});
 }
 document.addEventListener('DOMContentLoaded',()=>{initBase();initCollection();initCompare();initFish();initLab();initExtras()});
