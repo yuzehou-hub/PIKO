@@ -1,21 +1,44 @@
 
 function initPreloader(){
  const loader=document.querySelector('#preloader');if(!loader)return;
- const bar=loader.querySelector('.loader-progress-track'),fill=loader.querySelector('#loader-progress-fill'),label=loader.querySelector('#loader-percent'),skip=loader.querySelector('#loader-skip');
- const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- let completed=false,closing=false,done=0;
- // Only the essential above-the-fold images are tracked. Remaining images are lazy-loaded.
- const essential=['assets/loading-can.webp','assets/fish-whole.png','assets/fish-cut.png'];
- const total=essential.length;
- const update=()=>{const n=Math.round(done/total*100);fill.style.width=n+'%';label.textContent=String(n).padStart(2,'0')+'%';bar.setAttribute('aria-valuenow',String(n))};
- const finish=()=>{if(closing)return;closing=true;loader.classList.add('is-opening');const delay=reduced?0:950;window.setTimeout(()=>{loader.classList.add('is-hidden');window.setTimeout(()=>loader.remove(),reduced?30:550)},delay)};
- const mark=()=>{done++;update();if(done===total){completed=true;window.setTimeout(finish,reduced?0:240)}};
- essential.forEach(src=>{const image=new Image();image.onload=mark;image.onerror=mark;image.src=src;if(image.complete){/* onload still fires for cached resources in modern browsers */}});
- // A slow connection never traps the visitor. Skip is available after a short wait.
- window.setTimeout(()=>{if(!completed)skip.hidden=false},2400);
- skip.addEventListener('click',finish);
- window.setTimeout(()=>{if(!closing){skip.hidden=false;finish()}},12000);
- update();
+ // Deep links (including return from Style Lab) must never replay the intro.
+ if(location.hash && document.getElementById(location.hash.slice(1))){loader.remove();return;}
+ try{if(sessionStorage.getItem('pikoIntroSeen')==='1'){loader.remove();return;}}catch(e){}
+ const stage=loader.querySelector('.loader-product'),bar=loader.querySelector('.loader-progress-track'),fill=loader.querySelector('#loader-progress-fill'),label=loader.querySelector('#loader-percent'),skip=loader.querySelector('#loader-skip'),hint=loader.querySelector('#loader-hint');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let closing=false,done=0,shown=0,target=0,current=0,manual=false,ready=false,started=performance.now();
+ const motion=window.createCanMotion(document.querySelector('#loader-can-motion'));
+ const finish=(fly=false)=>{if(closing)return;closing=true;try{sessionStorage.setItem('pikoIntroSeen','1')}catch(e){}
+ const heroFish=document.querySelector('.fish-whole');
+ if(fly===true&&!reduced&&heroFish&&typeof Element.prototype.animate==='function'){
+  const r=stage.getBoundingClientRect(), dest=heroFish.getBoundingClientRect();
+  const ghost=document.createElement('img');ghost.src=heroFish.src;ghost.alt='';ghost.className='intro-flying-fish';document.body.append(ghost);
+  const w=r.width*960/1536,h=w*741/2048,x=r.left+r.width*765/1536-w/2,y=r.top+r.height*455/1024-h/2;
+  Object.assign(ghost.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
+  heroFish.style.visibility='hidden';loader.classList.add('fish-departure');
+  const dw=heroFish.offsetWidth,dh=heroFish.offsetHeight,dx=dest.left+dest.width/2-x-w/2,dy=dest.top+dest.height/2-y-h/2;
+  const tr=getComputedStyle(heroFish).transform;
+  const angle=tr==='none'?0:Math.atan2(new DOMMatrixReadOnly(tr).b,new DOMMatrixReadOnly(tr).a)*180/Math.PI;
+  const scale=tr==='none'?1:Math.hypot(new DOMMatrixReadOnly(tr).a,new DOMMatrixReadOnly(tr).b);
+  const anim=ghost.animate([{transform:'rotate(-16deg) scaleY(.72)'},{transform:`translate(${dx}px,${dy}px) rotate(${angle}deg) scale(${dw*scale/w},${dh*scale/h})`}],{duration:650,easing:'cubic-bezier(.22,.75,.25,1)',fill:'forwards'});
+  loader.classList.add('is-hidden');
+  const cleanup=()=>{heroFish.style.visibility='';ghost.remove();loader.remove()};anim.onfinish=cleanup;anim.oncancel=cleanup;setTimeout(cleanup,850);
+ }else{loader.classList.add('is-hidden');setTimeout(()=>loader.remove(),reduced?30:550)}
+ };
+ const mark=()=>done++;
+ ['assets/fish-whole.png','assets/fish-cut.png'].forEach(src=>{const image=new Image();image.onload=mark;image.onerror=mark;image.src=src});
+ motion.ready.then(()=>{ready=true;mark()},()=>{mark();hint.textContent='動畫載入失敗，請點擊 SKIP INTRO';skip.hidden=false});
+ function set(v){manual=true;target=Math.max(0,Math.min(1,v));}
+ function move(e){const r=stage.getBoundingClientRect();set((e.clientX-r.left)/(r.width*.95))}
+ stage.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||stage.hasPointerCapture(e.pointerId))move(e)});
+ stage.addEventListener('pointerdown',e=>{stage.setPointerCapture(e.pointerId);move(e)});
+ stage.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();set((manual?target:current)+(e.key==='ArrowRight'?.05:-.05))}});
+ skip.hidden=false;skip.addEventListener('click',finish);
+ function tick(now){if(closing)return;const elapsed=now-started;shown=Math.min(done/3,elapsed/1200);const n=Math.round(shown*100);fill.style.width=n+'%';label.textContent=String(n).padStart(2,'0')+'%';bar.setAttribute('aria-valuenow',String(n));
+ if(!manual)target=Math.min(.14,shown*.14);current+=(target-current)*.22;if(Math.abs(target-current)<.001)current=target;if(ready)motion.draw(reduced?target:current);
+ if(ready){hint.textContent='左右移動滑鼠或滑動手指，打開罐頭進入網站';if(manual&&target>=.99&&current>=.99){motion.draw(1);fill.style.width='100%';label.textContent='100%';bar.setAttribute('aria-valuenow','100');finish(true);return;}}
+ requestAnimationFrame(tick)}
+ requestAnimationFrame(tick);
 }
 "use strict";
 /* Editable demo content. Replace filenames, product copy, and charm placeholders here. */
