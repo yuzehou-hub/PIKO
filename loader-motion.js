@@ -2,7 +2,7 @@
 window.createCanMotion=function(canvas){
  const ctx=canvas.getContext('2d'), W=1536,H=1024; canvas.width=W;canvas.height=H;
  const imgs=['closed','lid','ring'].map(n=>{const i=new Image();i.src='assets/loader-'+n+'.webp';return i});
- const fish=new Image();fish.src="assets/fish-whole.png";
+ const fish=new Image();fish.src="assets/fish-whole.webp";
  const ready=Promise.all([...imgs,fish].map(i=>i.decode()));
  const outline=new Path2D('M 150 438 Q 180 370 280 339 L 945 164 Q 1080 130 1178 190 Q 1240 225 1360 405 Q 1410 480 1334 535 Q 1280 574 1160 606 L 490 755 Q 310 793 238 709 L 150 548 Q 119 486 150 438 Z');
  const clamp=x=>Math.max(0,Math.min(1,x));const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};

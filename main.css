@@ -26,7 +26,7 @@
 
 /* V1.2 — collection: white shelf backdrop, six independently interactive cans */
 .collection{background:#fff}
-.can-grid{position:relative;display:block;width:min(100%,1448px);aspect-ratio:1448/1250;margin-inline:auto;background:#fff url("assets/shelf-white.png") center/100% 100% no-repeat;isolation:isolate}
+.can-grid{position:relative;display:block;width:min(100%,1448px);aspect-ratio:1448/1250;margin-inline:auto;background:#fff url("assets/shelf-white.webp") center/100% 100% no-repeat;isolation:isolate}
 .shelf-can{position:absolute;z-index:1;display:grid;place-items:center;width:29%;height:24%;padding:0;border:0;background:transparent;cursor:pointer;transition:transform .3s cubic-bezier(.2,.8,.2,1),filter .3s}
 .shelf-can:nth-child(3n+1){left:2%}.shelf-can:nth-child(3n+2){left:35.5%}.shelf-can:nth-child(3n){left:69%}
 .shelf-can:nth-child(-n+3){top:11.2%}.shelf-can:nth-child(n+4){top:48%}
